@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-
 let bodyParser = require('body-parser');
 // create application/json parser
 let jsonParser = bodyParser.json();
@@ -9,15 +8,15 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 // Priority and utils
 const priority = require('priority-web-sdk');
 const helper = require('./helper');
-
 /* POST to retrieve priority ACCOUNTS Procedure */
 router.post('/', function(req, res, next) {
     (async () => {
         try{
-            let loginResp = await priority.login(helper.getCredentails()); // req.body.credentials
+           // let loginResp = await priority.login(helper.getCredentails()); // req.body.credentials
+            let loginResp = await priority.login(req.body.credentials); //
         }catch(error){
             res.statusCode = 400;
-            console.log(helper.getCredentails());
+            console.log(req.body.credentials);
             res.send(
                 'Priority module failed to start\n' + error.message + '\n Make sure to post credentials in the below format\n' + JSON.stringify(helper.getCredentails())
             );
@@ -75,7 +74,6 @@ router.post('/', function(req, res, next) {
         }
     })();
 });
-
 module.exports = router;
 
 

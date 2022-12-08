@@ -2,9 +2,9 @@ module.exports = {
     getCredentails: function getCredentails(){
         let configuration = {
             appname: 'demo',
-            username: 'API',
-            password: '1234567',
-            url: 'https://prioritydev.simplyct.co.il',
+            username: '******',
+            password: '******',
+            url: 'https://mydomain.com',
             tabulaini: 'tabula.ini',
             language: 2,
             profile: {
