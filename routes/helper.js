@@ -6,7 +6,7 @@ module.exports = {
             password: '******',
             url: 'https://mydomain.com',
             tabulaini: 'tabula.ini',
-            language: 2,
+            language: 1,
             profile: {
                 company: 'demo',
             },

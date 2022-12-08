@@ -24,9 +24,9 @@ router.post('/', function(req, res, next) {
         }
         try {
             let url = '';
-            let CUSTNAME = '999';
+            let CUSTNAME = req.body.CUSTNAME;
             // כרטסת
-            let procStepResult = await priority.procStart('ACCOUNTS', 'P', null, 'demo');
+            let procStepResult = await priority.procStart('ACCOUNTS', 'P', null, req.body.credentials.profile.company);
             //console.log(procStepResult.input);
             // get the select values
             let ChooseProps = {};
@@ -43,12 +43,34 @@ router.post('/', function(req, res, next) {
                 //   console.log(procChoose.Search.SearchLine)
             }
             /**/
+            var year = new Date().getFullYear()-1;
+            var fromdate = new Date(year, 0, 1);
+            // returns the month (from 0 to 11)
+            var month = fromdate.getMonth() + 1;
+            if (month < 10) month = "0" + month;
+            // returns the day of the month (from 1 to 31)
+            var day = fromdate.getDate();
+            if (day < 10) day = "0" + day;
+            // returns the year (four digits)
+            var year =  fromdate.getFullYear();
+
+            var fromdateformatted = day+"/"+month+"/"+ year.toString().substring(2,4);
+            var todate = new Date();
+            // returns the month (from 0 to 11)
+            var month = todate.getMonth() + 1;
+            if (month < 10) month = "0" + month;
+            // returns the day of the month (from 1 to 31)
+            var day = todate.getDate();
+            if (day < 10) day = "0" + day;
+            // returns the year (four digits)
+            var year =  todate.getFullYear();
+            var todateformatted = day+"/"+month+"/"+ year.toString().substring(2,4);
             var data = {EditFields: [
-                    {field: 1, op: 0, value: '01/01/21'},
-                    {field: 2, op: 0, value: '31/12/22'},
-                    {field: 3, op: 0, value: 'A/R Ledger'},
+                    {field: 1, op: 0, value: fromdateformatted},
+                    {field: 2, op: 0, value: todateformatted},
+                    {field: 3, op: 0, value: req.body.credentials.language == 1 ? 'כרטסת לקוחות'  :  'A/R Ledger' },       //'A/R Ledger'},
                     {field: 4, op: 0, value: 'ILS'},   // need to get the base currency of the system somehow...
-                    {field: 5, op: 0, value: 'Transaction Date'},
+                    {field: 5, op: 0, value: req.body.credentials.language == 1 ? 'תאריך אסמכתא' : 'Transaction Date' }, //'Transaction Date'},
                     {field: 6, op: 0, value: ''},
                     {field: 7, op: 0, value: ''}
                 ]};
