@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Customer Entry</title>
+    <style>
+        .item {
+            margin: 20px 10px 20px 10px;
+        }
+
+        input {
+            width: 200px;
+            height: 30px;
+            font-size: 16px;
+        }
+
+        label {
+            font-size: 16px;
+            display: inline-block;
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+<div id="container" onchange="fieldChangeHandler(event)">
+    <div class="item">
+        <label class="labelStyle">Customer Number</label>
+        <input id="CUSTNAME">
+    </div>
+    <div class="item">
+        <label>Customer Name</label>
+        <input id="CUSTDES">
+    </div>
+    <div class="item">
+        <label>Status</label>
+        <input id="STATDES">
+    </div>
+    <div class="item">
+        <label>Assigned to</label>
+        <input id="OWNERLOGIN">
+    </div>
+    <div class="item">
+        <label>Date Opened</label>
+        <input id="CREATEDDATE">
+    </div>
+</div>
+<script src="https://cdn.priority-software.com/upgrades/var/api/head/priorityapp.nocache.js"></script>
+<script>
+    var myForm;
+
+    function updateFields(result) {
+        if (result["CUSTOMERS"]) {
+            var fields = result["CUSTOMERS"][1];
+            for (var fieldName in fields) {
+                var el = document.getElementById(fieldName);
+                if(el) el.value = fields[fieldName];
+            }
+        }
+    }
+
+    function showMessage(message) {
+        if (message.type != "warning") {
+            alert(message.message);
+        } else {
+            if (confirm(message.message)) {
+                message.form.warningConfirm(1);
+            } else {
+                message.form.warningConfirm(0);
+            }
+        }
+    }
+
+    function fieldChangeHandler(event) {
+        myForm.fieldUpdate(event.srcElement.id, event.target.value);
+    }
+
+    function priorityReady() {
+        login({
+            username: 'API', password: '1234567',
+            url: 'https://prioritydev.simplyct.co.il', tabulaini: 'tabula.ini',
+            language: '2', company: 'demo', appname: 'Customers'})
+                .then(function() {
+                    return formStart('CUSTOMERS', showMessage, updateFields);
+                }).then(function(form) {
+                    myForm = form;
+                });
+                }
+</script>
+</body>
+</html>
