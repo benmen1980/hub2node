@@ -25,6 +25,12 @@
     </style>
 </head>
 <body>
+<p>
+    In order to avoid CORS you need to create a new Chrome shortcut on your desktop. Close all open chrome threads and open the new one.
+</p>
+<p>
+    "C:\Program Files\Google\Chrome\Application\chrome.exe" --disable-web-security --disable-gpu --user-data-dir=~/chromeTemp
+</p>
 <div id="container" onchange="fieldChangeHandler(event)">
     <div class="item">
         <label class="labelStyle">Customer Number</label>
@@ -37,6 +43,7 @@
     <div class="item">
         <label>Status</label>
         <input id="STATDES">
+        <button onClick="chooseHandler('STATDES')">Get values</button>
     </div>
     <div class="item">
         <label>Assigned to</label>
@@ -46,6 +53,22 @@
         <label>Date Opened</label>
         <input id="CREATEDDATE">
     </div>
+</div>
+<div>
+    <button onclick="saveHandler()">Save</button>
+    <p>Sub forms</p>
+    <button onclick="startCustpersonnel()">CustPersonnel</button>
+<div id="subform" onchange="fieldChangeHandlerSub(event)">
+    <p>Contacts</p>
+    <table id="tbl_custpersonnel">
+        <thead>
+        <tr><th>Name</th><th>Phone</th></tr>
+        </thead>
+        <tbody>
+             <tr><td><input id="NAME"></td><td><input id="PHONENUM"></td></tr>
+        </tbody>
+    </table>
+    <button onclick="saveHandlerSub()">Save Row</button>
 </div>
 <script src="https://cdn.priority-software.com/upgrades/var/api/head/priorityapp.nocache.js"></script>
 <script>
@@ -60,7 +83,6 @@
             }
         }
     }
-
     function showMessage(message) {
         if (message.type != "warning") {
             alert(message.message);
@@ -72,11 +94,13 @@
             }
         }
     }
-
     function fieldChangeHandler(event) {
         myForm.fieldUpdate(event.srcElement.id, event.target.value);
     }
-
+    function fieldChangeHandlerSub(event) {
+        console.log('sub form field change');
+        custpersonnel.fieldUpdate(event.srcElement.id, event.target.value);
+    }
     function priorityReady() {
         login({
             username: 'API', password: '1234567',
@@ -88,6 +112,37 @@
                     myForm = form;
                 });
                 }
+    function saveHandler() {
+        myForm.saveRow(0);
+    }
+    function saveHandlerSub() {
+        custpersonnel.saveRow(0);
+        custpersonnel.newRow();
+        // add row to the table
+        // Find a <table> element with id="myTable":
+        var tbodyRef  = document.getElementById("tbl_custpersonnel").getElementsByTagName('tbody')[0];
+
+// Create an empty <tr> element and add it to the 1st position of the table:
+        var row = tbodyRef.insertRow(0);
+
+// Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+
+        cell1.innerHTML = '<input id="NAME"></td>';
+        cell2.innerHTML = '<input id="PHONENUM"></td>';
+
+
+    }
+    async function startCustpersonnel(){
+       custpersonnel = await  myForm.startSubForm('CUSTPERSONNEL',null,null);
+    }
+    function chooseHandler(targetField, someObj) {
+        var targetValue = document.getElementById(targetField).value;
+        myForm.choose(targetField, targetValue).then(function(result) {
+            console.log(result);
+        });
+    }
 </script>
 </body>
 </html>
