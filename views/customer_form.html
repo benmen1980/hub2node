@@ -10,29 +10,64 @@
         .item {
             margin: 20px 10px 20px 10px;
         }
-
         input {
             width: 200px;
             height: 30px;
             font-size: 16px;
         }
-
         label {
             font-size: 16px;
             display: inline-block;
             width: 150px;
         }
+        .flex-grid {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .col {
+            flex: 1 0 20%;
+            margin: 5px;
+        }
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons that are used to open the tab content */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
     </style>
 </head>
 <body>
-<p>
-    In order to avoid CORS you need to create a new Chrome shortcut on your desktop. Close all open chrome threads and open the new one.
-</p>
-<p>
-    "C:\Program Files\Google\Chrome\Application\chrome.exe" --disable-web-security --disable-gpu --user-data-dir=~/chromeTemp
-</p>
-<div id="container" onchange="fieldChangeHandler(event)">
-    <div class="item">
+<div id="custname" class="flex-grid" onchange="fieldChangeHandler(event)">
+    <!--div class="item">
         <label class="labelStyle">Customer Number</label>
         <input id="CUSTNAME">
     </div>
@@ -52,12 +87,13 @@
     <div class="item">
         <label>Date Opened</label>
         <input id="CREATEDDATE">
-    </div>
+    </div-->
 </div>
 <div>
     <button onclick="saveHandler()">Save</button>
     <p>Sub forms</p>
     <button onclick="startCustpersonnel()">CustPersonnel</button>
+</div>
 <div id="subform" onchange="fieldChangeHandlerSub(event)">
     <p>Contacts</p>
     <table id="tbl_custpersonnel">
@@ -73,7 +109,6 @@
 <script src="https://cdn.priority-software.com/upgrades/var/api/head/priorityapp.nocache.js"></script>
 <script>
     var myForm;
-
     function updateFields(result) {
         if (result["CUSTOMERS"]) {
             var fields = result["CUSTOMERS"][1];
@@ -110,10 +145,58 @@
                     return formStart('CUSTOMERS', showMessage, updateFields);
                 }).then(function(form) {
                     myForm = form;
+                    // fields
+                    let myColumns = form.columns;
+                    let i =0;
+                    Object.entries(myColumns).forEach(function([key,value]){
+                      //  console.log(value);
+                        i++;
+                        if(i<12){
+                            addFieldToForm("custname",key,value);
+                        }
+                    })
+                    // subforms
+                    let mySubForms = form.subForms;
+                    i = 0;
+                    Object.entries(mySubForms).forEach(function([key,value]){
+                        i++;
+                        if(i<5){
+                            addSubFormsToForm(key,key,value);
+                        }
+                    })
                 });
                 }
-    function saveHandler() {
-        myForm.saveRow(0);
+    function addFieldToForm(formName,fieldName,formSpecs){
+        const div = document.createElement('div');
+        div.className = 'item col';
+        div.innerHTML = `
+        <label className="labelStyle ">`+ formSpecs.title +`</label>
+        <input id="`+ fieldName +`">`
+        document.getElementById(formName).appendChild(div);
+    }
+    function addSubFormsToForm(formName,fieldName,formSpecs){
+        let button = document.createElement('button');
+        button.className = 'tablinks ';
+        button.onclick = function(){
+            saveHandler();
+            openCity(event, formName.toLowerCase());
+        }
+        button.innerHTML = formSpecs.title;
+        document.getElementById('sub-form-tabs').appendChild(button);
+
+        div = document.createElement('div');
+        div.className = 'tabcontent';
+        div.id = formName.toLowerCase();
+        div.innerHTML = `<h3>nothing here yet...</h3>`;
+        document.getElementById('sub-forms-content').appendChild(div);
+
+    }
+    async function saveHandler() {
+       let res = await myForm.saveRow(0);
+       if(res){
+           document.getElementById("mainMessage").getElementsByTagName("p")[0].innerText = 'Form has been saved.' ;
+       }
+
     }
     function saveHandlerSub() {
         custpersonnel.saveRow(0);
@@ -144,5 +227,76 @@
         });
     }
 </script>
+<!-- tabs script -->
+<script>
+    async function openCity(evt, cityName) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tabcontent" and hide them
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Get all elements with class="tablinks" and remove the class "active"
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+
+        subform = await  myForm.startSubForm(cityName.toUpperCase(),null,null);
+        // fields
+        let myColumns = subform.columns;
+        let j =0;
+        Object.entries(myColumns).forEach(function([key,value]){
+            //  console.log(value);
+            j++;
+            if(j<12){
+                addFieldToForm(cityName.toLowerCase(),key,value);
+            }
+        })
+    }
+</script>
+<div id="form-subforms">
+<!-- Tab links -->
+<div id="sub-form-tabs" class="tab">
+    <!--button class="tablinks" onclick="openCity(event, 'London')">London</button>
+    <button class="tablinks" onclick="openCity(event, 'Paris')">Paris</button>
+    <button class="tablinks" onclick="openCity(event, 'Tokyo')">Tokyo</button-->
+</div>
+<!-- Tab content -->
+<div id="sub-forms-content">
+    <!--div id="London" class="tabcontent">
+        <h3>London</h3>
+        <p>London is the capital city of England.</p>
+    </div>
+    <div id="Paris" class="tabcontent">
+        <h3>Paris</h3>
+        <p>Paris is the capital of France.</p>
+    </div>
+    <div id="Tokyo" class="tabcontent">
+        <h3>Tokyo</h3>
+        <p>Tokyo is the capital of Japan.</p>
+    </div-->
+</div>
+</div>
+<div id="form-footer">
+    <p>
+        In order to avoid CORS you need to create a new Chrome shortcut on your desktop. Close all open chrome threads and open the new one.
+    </p>
+    <p>
+        "C:\Program Files\Google\Chrome\Application\chrome.exe" --disable-web-security --disable-gpu --user-data-dir=~/chromeTemp
+    </p>
+    <div id="mainMessage">
+        <p>
+            Start a new form...
+        </p>
+    </div>
+</div>
 </body>
 </html>
