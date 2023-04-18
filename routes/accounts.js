@@ -43,7 +43,7 @@ router.post('/', function(req, res, next) {
                 //   console.log(procChoose.Search.SearchLine)
             }
             /**/
-            var year = new Date().getFullYear()-1;
+            var year = new Date().getFullYear()-3;
             var fromdate = new Date(year, 0, 1);
             // returns the month (from 0 to 11)
             var month = fromdate.getMonth() + 1;
