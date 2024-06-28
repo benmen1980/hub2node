@@ -27,8 +27,9 @@ router.post('/', function(req, res, next) {
             let CUSTNAME = req.body.CUSTNAME;
             // כרטסת
             let procStepResult = await priority.procStart('ACCOUNTS', 'P', null, req.body.credentials.profile.company);
-            //console.log(procStepResult.input);
+            procStepResult = await procStepResult.proc.reportOptions(1,0);
             // get the select values
+            /*
             let ChooseProps = {};
             ChooseProps.ChooseFields = [];
             ChooseProps.ChooseFields[0] = {
@@ -42,8 +43,10 @@ router.post('/', function(req, res, next) {
             } else {
                 //   console.log(procChoose.Search.SearchLine)
             }
+*/
+
             /**/
-            var year = new Date().getFullYear()-3;
+            var year = new Date().getFullYear()-1;
             var fromdate = new Date(year, 0, 1);
             // returns the month (from 0 to 11)
             var month = fromdate.getMonth() + 1;
@@ -95,6 +98,9 @@ router.post('/', function(req, res, next) {
             );
         }
     })();
+});
+router.get('/',function(resq,res){
+    res.send('This slug works only with POST method, Make sure to post credentials in the below format: <br>' + JSON.stringify(helper.getCredentails()));
 });
 module.exports = router;
 
