@@ -10,13 +10,19 @@ const priority = require('priority-web-sdk');
 const helper = require('./helper');
 /* POST to retrieve priority ACCOUNTS Procedure */
 router.post('/', function(req, res, next) {
-    let url =  webSDK(req).then(url => {
+    webSDK(req).then(data => {
+      //  if(data.message) res.statusCode = 409;
         res.json(
-        {'report_url' : url}
+        {'invoice_url' : data.url,
+            'message': data.message,
+            'inputs' : data.inputs,
+            'formats' : data.formats,
+            'wordTemplates' : data.wordTemplates
+        }
     );});
 });
 router.get('/',function(req,res){
-    res.send('This slug works only with POST method, Make sure to post credentials in the below format: <br>' + JSON.stringify(helper.getCredentails()));
+    res.send('This service works only with POST method, Make sure to post credentials in the below format: <br>' + '"IVNUM":"IV123456",' + JSON.stringify( helper.getCredentails()));
 });
 module.exports = router;
 async function webSDK(req) {
@@ -26,25 +32,32 @@ async function webSDK(req) {
 
         // WWWSHOWAIV is for printing Sales Invoices. Other types of invoices
         // use other printout programs.
+        let procFormats ;
+        let procWordTemplate ;
         let procedure = await priority.procStart("WWWSHOWAIV", "P", null);
+        let procInput = procedure.input;
         let field2 = procedure.input.EditFields[1].value;
         procedure = await procedure.proc.inputOptions(1 , 1);
         // Provide your own invoice number for testing puproses.
         // The value of field 2 (Sort) must match the language you are working in
-        let IVNAME = req.body.IVNAME;
+        let IVNUM = req.body.IVNUM;
         var data = {EditFields: [
-                {field: 1, op: 0, value: IVNAME},
+                {field: 1, op: 0, value: IVNUM},
                 {field: 2, op: 0, value: field2}
             ]};
 
         procedure = await procedure.proc.inputFields(1 , data);
+        if(procedure.messagetype == 'error'){
+            return {'message' : procedure.message,'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
+        }
         procedure = await procedure.proc.clientContinue();
+        procFormats =  procedure.formats;
+        procWordTemplate = procedure.wordTemplates;
         procedure = await procedure.proc.continueProc();
-        let message = await procedure.proc.message(1, function(m){console.log(m)},function(m){console.log(m)});
         console.log(procedure.Urls[0].url);
         let url = await procedure.Urls[0].url;
         await procedure.proc.cancel()
-        return url;
+        return {'url' : url,'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
     } catch (reason) {
         return reason;
     }

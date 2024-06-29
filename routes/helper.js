@@ -15,6 +15,6 @@ module.exports = {
             appkey: '*****'
 
         };
-        return configuration;
+        return {'credentials' : configuration};
     }
 }
