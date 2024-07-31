@@ -52,10 +52,11 @@ async function webSDK(req) {
         }
         procedure = await procedure.proc.clientContinue();
         procFormats =  procedure.formats;
+        procedure = await procedure.proc.documentOptions(1, -4,{pdf : 1,word :  false, mode: 'display'});
         procWordTemplate = procedure.wordTemplates;
-        procedure = await procedure.proc.continueProc();
         console.log(procedure.Urls[0].url);
         let url = await procedure.Urls[0].url;
+        procedure = await procedure.proc.continueProc();
         await procedure.proc.cancel()
         return {'url' : url,'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
     } catch (reason) {
