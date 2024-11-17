@@ -9,6 +9,7 @@ var usersRouter = require('./routes/users');
 var accountsRouter = require('./routes/accounts');
 var printAinvoiceRouter = require('./routes/printAinvoice');
 var closeAinvoicesRouter = require('./routes/closeAinvoices');
+var closeTinvoicesRouter = require('./routes/closeTinvoices');
 var customer_formRouter = require('./routes/customer_form');
 
 var app = express();
@@ -28,6 +29,7 @@ app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
 app.use('/printAinvoice', printAinvoiceRouter);
 app.use('/closeAinvoices', closeAinvoicesRouter);
+app.use('/closeTinvoices', closeTinvoicesRouter);
 app.use('/customer_form', customer_formRouter);
 
 // catch 404 and forward to error handler
