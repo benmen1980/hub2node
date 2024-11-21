@@ -72,7 +72,7 @@ router.post('/', function(req, res, next) {
                     {field: 1, op: 0, value: fromdateformatted},
                     {field: 2, op: 0, value: todateformatted},
                     {field: 3, op: 0, value: req.body.credentials.language == 1 ? 'כרטסת לקוחות'  :  'A/R Ledger' },       //'A/R Ledger'},
-                    {field: 4, op: 0, value: 'ש"ח'},   // need to get the base currency of the system somehow...
+                    {field: 4, op: 0, value: req.body.CODE || 'ש"ח'},   // need to get the base currency of the system somehow...
                     {field: 5, op: 0, value: req.body.credentials.language == 1 ? 'תאריך אסמכתא' : 'Transaction Date' }, //'Transaction Date'},
                     {field: 6, op: 0, value: ''},
                     {field: 7, op: 0, value: ''}
