@@ -30,6 +30,18 @@ router.get('/', (req, res) => {
 
 module.exports = router;
 
+async function onShowMessageFunc(message){
+    console.log('Priority Message:', message.message);
+    /*
+    return {
+        error: {
+            type: 'Priority Error',
+            code: '',
+            message: message || 'An unknown error occurred.',
+        }
+    };
+    */
+};
 async function webSDK(req) {
     // Extract IVNUM from the request body
     const IVNUM = req.body.IVNUM;
@@ -60,24 +72,28 @@ async function webSDK(req) {
         ],
     };
 
+
+
     try {
         // Attempt to log in to Priority with credentials from the request body
         await priority.login(req.body.credentials);
 
         // Starting the form interaction
-        const form = await priority.formStart("TINVOICES", () => {}, () => {}, 'demo', 0);
+
+        const form = await priority.formStart("TINVOICES", onShowMessageFunc, () => {
+        }, 'demo', 0);
 
         // Setting filter and retrieving data
         await form.setSearchFilter(filter);
         await form.getRows(1);
         await form.setActiveRow(1);
-
         // Activating form procedure
         const activateResult = await form.activateStart('CLOSETIV', 'P');
-        const procMessage = await activateResult.proc.message(1);
+        const activateEnd = await form.activateEnd();
+       // Confirming any warning
+        const warningConfirm = await form.warningConfirm(1);
+       // const procMessage = await activateResult.proc.message(1);
 
-        // Confirming any warning
-        await form.warningConfirm(1);
 
         // Ending the form session
         await form.endCurrentForm();
@@ -93,7 +109,7 @@ async function webSDK(req) {
     } catch (error) {
         // Return structured error response from Priority SDK
         if (error?.type === 'apiError') {
-            return { error };
+            return {error};
         }
 
         // Return any other general errors
