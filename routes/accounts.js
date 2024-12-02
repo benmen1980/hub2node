@@ -47,6 +47,7 @@ router.post('/', function(req, res, next) {
 
             /**/
             var year = new Date().getFullYear();
+            year = req.body.YEAR || year;
             var fromdate = new Date(year, 0, 1);
             // returns the month (from 0 to 11)
             var month = fromdate.getMonth() + 1;
