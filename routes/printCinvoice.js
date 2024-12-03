@@ -35,6 +35,9 @@ async function webSDK(req) {
         let procFormats ;
         let procWordTemplate ;
         let procedure = await priority.procStart("WWWSHOWCIV", "P", null);
+        if(procedure.messagetype == 'error'){
+            return {'message' : procedure.message};
+        }
         let ChooseProps = {};
         ChooseProps.ChooseFields = [];
         ChooseProps.ChooseFields[0] = {
@@ -57,7 +60,7 @@ async function webSDK(req) {
 
         procedure = await procedure.proc.inputFields(1 , data);
         if(procedure.messagetype == 'error'){
-            return {'message' : procedure.message,'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
+            return {'message' : procedure.message};
         }
         procedure = await procedure.proc.clientContinue();
         procFormats =  procedure.formats;
