@@ -34,7 +34,7 @@ async function webSDK(req) {
         // use other printout programs.
         let procFormats ;
         let procWordTemplate ;
-        let procedure = await priority.procStart("WWWSHOWAIV", "P", null);
+        let procedure = await priority.procStart("WWWSHOWEIV", "P", null);
         let procInput = procedure.input;
         let field2 = procedure.input.EditFields[1].value;
         procedure = await procedure.proc.inputOptions(1 , 1);
@@ -52,7 +52,7 @@ async function webSDK(req) {
         }
         procedure = await procedure.proc.clientContinue();
         procFormats =  procedure.formats;
-        procedure = await procedure.proc.documentOptions(1, -4,{pdf : 1,word :  false, mode: 'display'});
+        procedure = await procedure.proc.documentOptions(1, -4,{pdf : 1,word :  false, mode: 'automail'});
         procWordTemplate = procedure.wordTemplates;
         console.log(procedure.Urls[0].url);
         let url = await procedure.Urls[0].url;

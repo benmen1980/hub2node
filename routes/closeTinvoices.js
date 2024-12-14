@@ -76,7 +76,7 @@ async function webSDK(req) {
 
     try {
         // Attempt to log in to Priority with credentials from the request body
-        await priority.login(req.body.credentials);
+        let pri =  await priority.login(req.body.credentials);
 
         // Starting the form interaction
 
