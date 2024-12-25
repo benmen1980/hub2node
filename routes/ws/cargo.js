@@ -2,58 +2,47 @@ const express = require('express');
 const request = require('request'); // Import the request library
 const router = express.Router();
 
-// Environment variables or fallback values
-const API_URL = process.env.API_URL || 'https://prioritydev4.simplyct.co.il/odata/Priority/tabula.ini,2/demo/CHNGDOCUMENTS_D';
-const API_USER = process.env.API_USER || 'API';
-const API_PASSWORD = process.env.API_PASSWORD || '1234567';
-const AUTH_HEADER = `Basic ${Buffer.from(`${API_USER}:${API_PASSWORD}`).toString('base64')}`;
-
-// GET request for /ws/cargo
-router.get('/', (req, res) => {
-    res.send('This is the /ws/cargo endpoint!');
-});
-
 // POST request for /ws/cargo
 router.post('/', (req, res) => {
     const clientData = req.body; // Access the parsed JSON body
     console.log('Received JSON:', clientData);
 
-
-    // Check if shipment_id and status_code exist in clientData
-    if (!clientData.shipment_id || !clientData.status_code) {
-        console.error('Error: Missing required fields in client data.');
-        return res.status(400).json({
-            error: 'Missing required fields: shipment_id and status_code must be provided.'
-        });
-    }
-
     // Create options for the PATCH request
     const options = {
         method: 'PATCH',
-        url: API_URL,
+        url: process.env.API_URL || 'https://prioritydev4.simplyct.co.il/odata/Priority/tabula.ini,2/demo/CHNGDOCUMENTS_D',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': AUTH_HEADER
+            'Authorization': `Basic ${Buffer.from(`${process.env.API_USER || 'API'}:${process.env.API_PASSWORD || '1234567'}`).toString('base64')}`
         },
         body: JSON.stringify({
-            ROYY_CARGOSHIPMENTID: clientData.shipment_id || '12345', // Use client data or default
-            ROYY_CARGOSTATIS: parseInt(clientData.status_code, 10) || 7 // Use client data or default
+            ROYY_CARGOSHIPMENTID: clientData.shipment_id || '12345',
+            ROYY_CARGOSTATIS: parseInt(clientData.status_code, 10) || 7
         })
     };
 
     // Make the PATCH request
-    request(options, function (error, response) {
+    request(options, function (error, response, body) {
         if (error) {
             console.error('Error making PATCH request:', error);
             return res.status(500).json({ error: 'Internal server error' });
         }
 
-        console.log('Response from external API:', response.body);
+        // Handle invalid JSON response
+        let apiResponse;
+        try {
+            apiResponse = JSON.parse(body);
+        } catch (parseError) {
+            console.error('Error parsing response:', parseError);
+            return res.status(500).json({ error: 'Invalid response from external API' });
+        }
+
+        console.log('Response from external API:', apiResponse);
 
         // Send response back to the client
         res.status(response.statusCode).json({
             message: 'Data sent to external API successfully',
-            externalApiResponse: JSON.parse(response.body)
+            externalApiResponse: apiResponse
         });
     });
 });
