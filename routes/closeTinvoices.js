@@ -30,17 +30,21 @@ router.get('/', (req, res) => {
 
 module.exports = router;
 
+let capturedMessage = null;
+
 async function onShowMessageFunc(message){
     console.log('Priority Message:', message.message);
-    /*
+    //message.form.warningConfirm(1);
+    message.form.infoMsgConfirm();
+    capturedMessage = message.message;
     return {
         error: {
             type: 'Priority Error',
             code: '',
-            message: message || 'An unknown error occurred.',
+            message: message.message || 'An unknown error occurred.',
         }
     };
-    */
+
 };
 async function webSDK(req) {
     // Extract IVNUM from the request body
@@ -91,8 +95,8 @@ async function webSDK(req) {
         const activateResult = await form.activateStart('CLOSETIV', 'P');
         const activateEnd = await form.activateEnd();
        // Confirming any warning
-        const warningConfirm = await form.warningConfirm(1);
-       // const procMessage = await activateResult.proc.message(1);
+        const procMessage = await form.warningConfirm(1);
+       //const procMessage = await activateResult.proc.message(1);
 
 
         // Ending the form session
@@ -100,7 +104,7 @@ async function webSDK(req) {
 
         // Return the result as a plain object (no circular references)
         return {
-            message: 'Form interaction completed successfully.',
+            message: capturedMessage || 'Form interaction completed successfully.',
             procMessage,
             inputs: activateResult.proc.inputs,
             formats: activateResult.proc.formats,

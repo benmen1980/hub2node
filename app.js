@@ -15,6 +15,7 @@ var printPriceQuoteRouter = require('./routes/printPriceQuote');
 var closeAinvoicesRouter = require('./routes/closeAinvoices');
 var closeTinvoicesRouter = require('./routes/closeTinvoices');
 var customer_formRouter = require('./routes/customer_form');
+var wsCargo = require('./routes/ws/cargo');
 
 var app = express();
 
@@ -39,6 +40,7 @@ app.use('/printPriceQuote', printPriceQuoteRouter);
 app.use('/closeAinvoices', closeAinvoicesRouter);
 app.use('/closeTinvoices', closeTinvoicesRouter);
 app.use('/customer_form', customer_formRouter);
+app.use('/ws/cargo',wsCargo);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
