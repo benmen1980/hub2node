@@ -1,4 +1,5 @@
 var createError = require('http-errors');
+var https = require('https');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -18,6 +19,34 @@ var customer_formRouter = require('./routes/customer_form');
 var wsCargo = require('./routes/ws/cargo');
 
 var app = express();
+
+// Fetch the public IP
+function fetchPublicIP(callback) {
+  https.get('https://checkip.amazonaws.com/', (res) => {
+    let data = '';
+    res.on('data', (chunk) => {
+      data += chunk;
+    });
+    res.on('end', () => {
+      callback(null, data.trim());
+    });
+  }).on('error', (err) => {
+    callback(err, null);
+  });
+}
+
+// Middleware to add public IP to locals
+app.use((req, res, next) => {
+  fetchPublicIP((err, publicIP) => {
+    if (err) {
+      console.error('Error fetching public IP:', err);
+      res.locals.publicIP = 'Unable to fetch IP';
+    } else {
+      res.locals.publicIP = publicIP;
+    }
+    next();
+  });
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
