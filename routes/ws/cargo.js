@@ -16,7 +16,7 @@ router.post('/', (req, res) => {
             'Authorization': `Basic ${Buffer.from(`${process.env.API_USER || 'API'}:${process.env.API_PASSWORD || '1234567'}`).toString('base64')}`
         },
         body: JSON.stringify({
-            ROYY_CARGOSHIPMENTID: clientData.shipment_id || '12345',
+            REUT_SHIPCODE: clientData.shipment_id || '12345',
             ROYY_CARGOSTATIS: parseInt(clientData.status_code, 10) || 7
         })
     };
