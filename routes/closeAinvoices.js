@@ -70,6 +70,14 @@ async function webSDK(req) {
         // Setting filter and retrieving data
         await form.setSearchFilter(filter);
         await form.getRows(1);
+        // **Added Error Handling for Empty Rows Result**
+        if (
+            !rowsResult ||
+            !rowsResult.AINVOICES ||
+            (typeof rowsResult.AINVOICES === 'object' && Object.keys(rowsResult.AINVOICES).length === 0)
+        ) {
+            throw new Error(`Error: There is no invoice with IVNUM "${IVNUM}" to close.`);
+        }
         await form.setActiveRow(1);
 
         // Activating form procedure

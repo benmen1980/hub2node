@@ -1,16 +1,26 @@
-const express = require('express');
-const router = express.Router();
+var express = require('express');
+var router = express.Router();
 const priority = require('priority-web-sdk');
-const bodyParser = require('body-parser');
+let bodyParser = require('body-parser');
 
 // Middleware for parsing JSON
 const jsonParser = bodyParser.json();
+
+// Debug middleware
+router.use((req, res, next) => {
+    console.log('--- Debug Middleware ---');
+    console.log('Method:', req.method);
+    console.log('URL:', req.url);
+    console.log('Body:', req.body); // Note: this may need `body-parser` or `express.json` to run first
+    console.log('------------------------');
+    next();
+});
 
 /* POST request handler */
 router.post('/', jsonParser, async (req, res) => {
     try {
         // Call the webSDK function and handle its response
-        const data = await webSDK(req);
+        const data = await   webSDK(req);
         if (data?.error) {
             return res.status(409).json(data.error);
         }
@@ -19,6 +29,7 @@ router.post('/', jsonParser, async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 /* GET request handler (for testing purposes) */
 router.get('/', (req, res) => {
@@ -44,7 +55,6 @@ async function onShowMessageFunc(message){
             message: message.message || 'An unknown error occurred.',
         }
     };
-
 };
 async function webSDK(req) {
     // Extract IVNUM from the request body
@@ -60,7 +70,6 @@ async function webSDK(req) {
             },
         };
     }
-
     // Define the search filter using IVNUM from the request body
     const filter = {
         or: 0,
@@ -75,29 +84,31 @@ async function webSDK(req) {
             },
         ],
     };
-
-
-
     try {
-        // Attempt to log in to Priority with credentials from the request body
-        let pri =  await priority.login(req.body.credentials);
-
+        console.log('Attempting to log in...');
+        await priority.login(req.body.credentials);
+        console.log("Your are in!! Enjoy!");
         // Starting the form interaction
-
         const form = await priority.formStart("TINVOICES", onShowMessageFunc, () => {
         }, 'demo', 0);
-
         // Setting filter and retrieving data
         await form.setSearchFilter(filter);
-        await form.getRows(1);
-        await form.setActiveRow(1);
+        const rowsResult = await form.getRows(1);
+        // **Added Error Handling for Empty Rows Result**
+        if (
+            !rowsResult ||
+            !rowsResult.TINVOICES ||
+            (typeof rowsResult.TINVOICES === 'object' && Object.keys(rowsResult.TINVOICES).length === 0)
+        ) {
+            throw new Error(`Error: There is no invoice with IVNUM "${IVNUM}" to close.`);
+        }
+        const activeRowResult = await form.setActiveRow(1);
         // Activating form procedure
         const activateResult = await form.activateStart('CLOSETIV', 'P');
         const activateEnd = await form.activateEnd();
        // Confirming any warning
         const procMessage = await form.warningConfirm(1);
        //const procMessage = await activateResult.proc.message(1);
-
 
         // Ending the form session
         await form.endCurrentForm();

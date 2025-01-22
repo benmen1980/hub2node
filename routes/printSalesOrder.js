@@ -27,7 +27,7 @@ router.get('/',function(req,res){
 module.exports = router;
 async function webSDK(req) {
     try {
-        await priority.login(req.body.credentials);
+        const loginResponse = await priority.login(req.body.credentials);
         console.log("Your are in!! Enjoy!");
 
         // WWWSHOWAIV is for printing Sales Invoices. Other types of invoices

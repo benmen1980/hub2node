@@ -14,13 +14,15 @@ var printCinvoiceRouter = require('./routes/printCinvoice');
 var printSalesOrderRouter = require('./routes/printSalesOrder');
 var printPriceQuoteRouter = require('./routes/printPriceQuote');
 var closeAinvoicesRouter = require('./routes/closeAinvoices');
-var closeTinvoicesRouter = require('./routes/closeTinvoices');
+const closeTinvoicesRouter = require('./routes/closeTinvoices');
 var customer_formRouter = require('./routes/customer_form');
 var wsCargo = require('./routes/ws/cargo');
+//var sheferRouter = require('./routes/shefer/app');
 
 var app = express();
 
 // Fetch the public IP
+
 function fetchPublicIP(callback) {
   https.get('https://checkip.amazonaws.com/', (res) => {
     let data = '';
@@ -36,6 +38,7 @@ function fetchPublicIP(callback) {
 }
 
 // Middleware to add public IP to locals
+
 app.use((req, res, next) => {
   fetchPublicIP((err, publicIP) => {
     if (err) {
@@ -70,13 +73,17 @@ app.use('/closeAinvoices', closeAinvoicesRouter);
 app.use('/closeTinvoices', closeTinvoicesRouter);
 app.use('/customer_form', customer_formRouter);
 app.use('/ws/cargo',wsCargo);
+//app.use('/shefer/app',sheferRouter);
 
 // catch 404 and forward to error handler
+
 app.use(function(req, res, next) {
+  console.log("Reached 404 middleware - route not matched.");
   next(createError(404));
 });
 
 // error handler
+
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;

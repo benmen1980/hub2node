@@ -10,10 +10,10 @@ router.post('/', (req, res) => {
     // Create options for the PATCH request
     const options = {
         method: 'PATCH',
-        url: process.env.API_URL || 'https://prioritydev4.simplyct.co.il/odata/Priority/tabula.ini,2/demo/CHNGDOCUMENTS_D',
+        url: process.env.API_URL || 'https://tovtest.wee.co.il/odata/Priority/tabula.ini,2/demo/CHNGDOCUMENTS_D',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Basic ${Buffer.from(`${process.env.API_USER || 'API'}:${process.env.API_PASSWORD || '1234567'}`).toString('base64')}`
+            'Authorization': `Basic ${Buffer.from(`${process.env.API_USER || 'API'}:${process.env.API_PASSWORD || '123456'}`).toString('base64')}`
         },
         body: JSON.stringify({
             REUT_SHIPCODE: clientData.shipment_id.toString() || '12345',
@@ -70,5 +70,8 @@ router.post('/', (req, res) => {
         });
     });
 });
-
+router.get('/', (req, res) => {
+    console.log('Request to /ws/cargo');
+    res.send('Cargo route should be used with POST!');
+});
 module.exports = router;
