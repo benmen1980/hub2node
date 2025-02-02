@@ -94,7 +94,7 @@ async function webSDK(req) {
         }, req.body.credentials.profile.company, 0);
         // Setting filter and retrieving data
         await form.setSearchFilter(filter);
-        const rowsResult = await form.getRows(1);
+        let rowsResult = await form.getRows(1);
         // **Added Error Handling for Empty Rows Result**
         if (
             !rowsResult ||
@@ -107,6 +107,7 @@ async function webSDK(req) {
         // Activating form procedure
         const activateResult = await form.activateStart('CLOSETIV', 'P');
         const activateEnd = await form.activateEnd();
+        rowsResult = await form.getRows(1);
        // Confirming any warning
         const procMessage = await form.warningConfirm(1);
        //const procMessage = await activateResult.proc.message(1);
@@ -117,6 +118,7 @@ async function webSDK(req) {
         // Return the result as a plain object (no circular references)
         return {
             message: capturedMessage || 'Form interaction completed successfully.',
+            ivnum : rowsResult.TINVOICES["1"].IVNUM,
             procMessage,
             inputs: activateResult.proc.inputs,
             formats: activateResult.proc.formats,
