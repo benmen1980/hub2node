@@ -73,14 +73,15 @@ async function webSDK(req) {
     // Define the search filter using IVNUM from the request body
     const filter = {
         or: 0,
-        ignorecase: 1,
+        ignorecase:1,
         QueryValues: [
             {
                 field: 'IVNUM',
                 fromval: IVNUM,
+                toval: null,
                 op: '=',
                 sort: 0,
-                isdesc: 0,
+                isdesc: 0
             },
         ],
     };
@@ -90,7 +91,7 @@ async function webSDK(req) {
         console.log("Your are in!! Enjoy!");
         // Starting the form interaction
         const form = await priority.formStart("TINVOICES", onShowMessageFunc, () => {
-        }, 'demo', 0);
+        }, req.body.credentials.profile.company, 0);
         // Setting filter and retrieving data
         await form.setSearchFilter(filter);
         const rowsResult = await form.getRows(1);

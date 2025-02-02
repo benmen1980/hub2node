@@ -65,7 +65,8 @@ async function webSDK(req) {
         await priority.login(req.body.credentials);
 
         // Starting the form interaction
-        const form = await priority.formStart("AINVOICES", () => {}, () => {}, 'demo', 0);
+        const form = await priority.formStart("AINVOICES", () => {}, () => {},
+            req.body.credentials.profile.company, 0);
 
         // Setting filter and retrieving data
         await form.setSearchFilter(filter);
