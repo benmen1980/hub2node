@@ -76,8 +76,8 @@ app.use('/ws/cargo',wsCargo);
 //app.use('/shefer/app',sheferRouter);
 
 // Static route for generated PDFs
-app.use('/pdfs', express.static(path.join(__dirname, 'tmp')));
 
+app.use('/pdfs', express.static(path.join(__dirname, 'routes', 'tmp')));
 
 
 // catch 404 and forward to error handler
