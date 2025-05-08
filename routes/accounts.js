@@ -85,13 +85,15 @@ router.post('/', async function (req, res) {
 
         // Check if PDF generation is requested
         if (req.body.pdf === true || req.body.pdf === 'true') {
-            const tmpDir = path.join(__dirname, '..', 'tmp');
+            const tmpDir = path.join(__dirname, 'tmp');
+            const filePath = path.join(tmpDir, fileName);
+
             if (!fs.existsSync(tmpDir)) {
-                fs.mkdirSync(tmpDir, { recursive: true });
+                fs.mkdirSync(tmpDir);
             }
 
             const fileName = `ar_ledger_${Date.now()}.pdf`;
-            const filePath = path.join(tmpDir, fileName);
+
 
             try {
                 const os = require('os');
