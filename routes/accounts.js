@@ -94,10 +94,16 @@ router.post('/', async function (req, res) {
             const filePath = path.join(tmpDir, fileName);
 
             try {
+                const os = require('os');
+                const isLinux = os.platform() === 'linux';
+
                 const browser = await puppeteer.launch({
                     headless: 'new',
+                    executablePath: isLinux ? '/usr/bin/google-chrome-stable' : undefined, // Linux only
                     args: ['--no-sandbox', '--disable-setuid-sandbox']
                 });
+
+
 
                 const page = await browser.newPage();
                 await page.goto(url, { waitUntil: 'networkidle0' });
