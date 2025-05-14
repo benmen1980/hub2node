@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const priority = require('priority-web-sdk');
 const helper = require('./helper');
+const os = require('os');
 
 // Body parsers
 const jsonParser = bodyParser.json();
@@ -33,9 +34,40 @@ router.post('/', async function (req, res) {
         let procStepResult = await priority.procStart('ACCOUNTS', 'P', null, req.body.credentials.profile.company);
         procStepResult = await procStepResult.proc.reportOptions(1, 0);
 
+        // -------- Date Logic --------
         const now = new Date();
-        const fromDate = new Date(req.body.YEAR || now.getFullYear(), 0, 1);
-        const toDate = now;
+        let fromDate = null;
+        let toDate = null;
+
+        const isValidDateFormat = (str) => /^\d{2}-\d{2}-\d{2}$/.test(str);
+
+        const parseInputDate = (str) => {
+            if (!isValidDateFormat(str)) return null;
+            const [day, month, year] = str.split('-');
+            const fullYear = parseInt(year, 10) + 2000;
+            const date = new Date(`${fullYear}-${month}-${day}`);
+            return isNaN(date.getTime()) ? null : date;
+        };
+
+        if (req.body.from_date && req.body.to_date) {
+            const parsedFrom = parseInputDate(req.body.from_date);
+            const parsedTo = parseInputDate(req.body.to_date);
+
+            if (!parsedFrom || !parsedTo) {
+                return res.status(400).send('Invalid date format. Use dd-mm-yy (e.g., 15-05-25).');
+            }
+
+            if (parsedFrom > parsedTo) {
+                return res.status(400).send('Invalid date range: from_date must be before or equal to to_date.');
+            }
+
+            fromDate = parsedFrom;
+            toDate = parsedTo;
+        } else {
+            const year = req.body.YEAR || now.getFullYear();
+            fromDate = new Date(year, 0, 1);
+            toDate = now;
+        }
 
         const formatDate = (d) => {
             const day = String(d.getDate()).padStart(2, '0');
@@ -47,7 +79,7 @@ router.post('/', async function (req, res) {
         const fromdateformatted = formatDate(fromDate);
         const todateformatted = formatDate(toDate);
 
-        // First screen
+        // -------- First screen --------
         const data1 = {
             EditFields: [
                 { field: 1, op: 0, value: fromdateformatted },
@@ -68,7 +100,7 @@ router.post('/', async function (req, res) {
 
         procStepResult = await procStepResult.proc.inputFields(1, data1);
 
-        // Second screen
+        // -------- Second screen --------
         const data2 = {
             EditFields: [
                 { field: 1, op: 0, value: CUSTNAME },
@@ -80,10 +112,10 @@ router.post('/', async function (req, res) {
 
         procStepResult = await procStepResult.proc.inputFields(1, data2);
 
-        // Get report URL
+        // -------- Get report URL --------
         url = procStepResult.Urls[0].url;
 
-        // Check if PDF generation is requested
+        // -------- Check if PDF generation is requested --------
         if (req.body.pdf === true || req.body.pdf === 'true') {
             const tmpDir = path.join(__dirname, 'tmp');
             const fileName = `ar_ledger_${Date.now()}.pdf`;
@@ -93,20 +125,14 @@ router.post('/', async function (req, res) {
                 fs.mkdirSync(tmpDir);
             }
 
-
-
-
             try {
-                const os = require('os');
                 const isLinux = os.platform() === 'linux';
 
                 const browser = await puppeteer.launch({
                     headless: 'new',
-                    executablePath: isLinux ? '/usr/bin/google-chrome-stable' : undefined, // Linux only
+                    executablePath: isLinux ? '/usr/bin/google-chrome-stable' : undefined,
                     args: ['--no-sandbox', '--disable-setuid-sandbox']
                 });
-
-
 
                 const page = await browser.newPage();
                 await page.goto(url, { waitUntil: 'networkidle0' });
@@ -131,9 +157,8 @@ router.post('/', async function (req, res) {
             }
         }
 
-// If PDF not requested, just return the URL
+        // -------- Return report URL only --------
         res.json({ report_url: url });
-
 
     } catch (error) {
         console.error("Error in /accounts:", error);
