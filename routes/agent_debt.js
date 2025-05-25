@@ -37,8 +37,7 @@ router.post('/', async function (req, res) {
         // parameters 1
         const data = {
             EditFields: [
-                { field: 1, op: 0, value:  procStepResult.input.EditFields[0].value},
-                { field: 2, op: 0, value: procStepResult.input.EditFields[1].value },
+                { field: 1, op: 0, value:  procStepResult.input.EditFields[0].value}
 
             ]
         };
@@ -48,14 +47,28 @@ router.post('/', async function (req, res) {
         // -------- Second screen --------
         const data2 = {
             EditFields: [
-                { field: 1, op: 0, value: '*' },
-                { field: 2, op: 0, value: '' },
+                { field: 1, op: 0, value: procStepResult.input.EditFields[0].value },
+                { field: 2, op: 0, value: procStepResult.input.EditFields[1].value }
+                /*,
                 { field: 3, op: 0, value: '' },
-                { field: 4, op: 0, value: AGENTCODE } // need to block by AGENTCODE
+                { field: 4, op: 0, value: AGENTCODE } */
             ]
         };
 
         procStepResult = await procStepResult.proc.inputFields(1, data2);
+
+
+        // -------- Third screen --------
+        const data3 = {
+            EditFields: [
+                { field: 1, op: 0, value: '' },
+                { field: 2, op: 0, value: '' },
+                { field: 3, op: 0, value: '' },
+                { field: 4, op: 0, value: AGENTCODE }
+            ]
+        };
+
+        procStepResult = await procStepResult.proc.inputFields(1, data3);
 
 
         // -------- Get report URL --------
