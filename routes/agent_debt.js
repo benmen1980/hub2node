@@ -29,6 +29,7 @@ router.post('/', async function (req, res) {
     try {
         let url = '';
         const AGENTCODE = req.body.AGENTCODE;
+        const CUSTNAME = req.body.CUSTNAME;
 
         // Start procedure
         let procStepResult = await priority.procStart('AGENT_AGEDEBTCUST', 'P', null, req.body.credentials.profile.company);
@@ -61,7 +62,7 @@ router.post('/', async function (req, res) {
         // -------- Third screen --------
         const data3 = {
             EditFields: [
-                { field: 1, op: 0, value: '' },
+                { field: 1, op: 0, value: CUSTNAME },
                 { field: 2, op: 0, value: '' },
                 { field: 3, op: 0, value: '' },
                 { field: 4, op: 0, value: AGENTCODE }
