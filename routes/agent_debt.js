@@ -58,65 +58,106 @@ router.post('/', async function (req, res) {
 
         procStepResult = await procStepResult.proc.inputFields(1, data2);
 
-
+        let ChooseProps = {};
+        ChooseProps.ChooseFields = [];
+        ChooseProps.ChooseFields[0] = {
+            field: 1,
+            value: ""
+        };
+        const procChoose = await procStepResult.proc.choose(1, '', ChooseProps);
         // -------- Third screen --------
+        const zoomForm = await procStepResult.proc.formZoom(
+            1,                            // Field ID: 1 = CUSTNAME
+            null,                         // onShowMessage
+            null,                         // onUpdateFields
+            req.body.credentials.profile, // Current profile
+            true                          // autoRetrieveFirstRows
+        );
+
+        let filter = {
+            or: 0,
+            ignorecase: 1,
+            QueryValues: [
+                {
+                    field: 'ACCNAME', // Must match the field name in the zoom form
+                    fromval: '600170', // The value you're searching for
+                    toval: '',
+                    op:"=",           // Operator: exact match
+                    sort: 0,
+                    isdesc: 0
+                }
+            ]
+        };
+        await zoomForm.setSearchFilter(filter);
+        const rows = await zoomForm.getRows(1); // 1 = number of rows to fetch (can be 50, 100 etc.)
+         filter = {
+            or: 0,
+            ignorecase: 1,
+            QueryValues: [
+                {
+                    field: 'ACCNAME', // Must match the field name in the zoom form
+                    fromval: '61063', // The value you're searching for
+                    toval: '',
+                    op:"=",           // Operator: exact match
+                    sort: 0,
+                    isdesc: 0
+                }
+            ]
+        };
+        await zoomForm.setSearchFilter(filter);
+        const rows2 = await zoomForm.getRows(1); // 1 = number of rows to fetch (can be 50, 100 etc.)
+        rows.ACCOUNTS_RECEIVABLE["2"] = rows2.ACCOUNTS_RECEIVABLE["1"];
+       // await zoomForm.setActiveRow(1); // Selects the first (and hopefully only) row
+        if (rows.length === 0) {
+            throw new Error("Customer  not found ");
+        }
+
+        procStepResult = await zoomForm.endCurrentForm({
+          //  returnJustThisRow: rows
+        });
         const data3 = {
             EditFields: [
-                { field: 1, op: 0, value: CUSTNAME },
                 { field: 2, op: 0, value: '' },
                 { field: 3, op: 0, value: '' },
                 { field: 4, op: 0, value: AGENTCODE }
             ]
         };
-
         procStepResult = await procStepResult.proc.inputFields(1, data3);
-
-
         // -------- Get report URL --------
         url = procStepResult.Urls[0].url;
-
         // -------- Check if PDF generation is requested --------
         if (req.body.pdf === true || req.body.pdf === 'true') {
             const tmpDir = path.join(__dirname, 'tmp');
             const fileName = `ar_ledger_${Date.now()}.pdf`;
             const filePath = path.join(tmpDir, fileName);
-
             if (!fs.existsSync(tmpDir)) {
                 fs.mkdirSync(tmpDir);
             }
-
             try {
                 const isLinux = os.platform() === 'linux';
-
                 const browser = await puppeteer.launch({
                     headless: 'new',
                     executablePath: isLinux ? '/usr/bin/google-chrome-stable' : undefined,
                     args: ['--no-sandbox', '--disable-setuid-sandbox']
                 });
-
                 const page = await browser.newPage();
                 await page.goto(url, { waitUntil: 'networkidle0' });
-
                 await page.pdf({
                     path: filePath,
                     format: 'A4',
                     printBackground: true
                 });
-
                 await browser.close();
-
                 const publicUrl = `${req.protocol}://${req.get('host')}/pdfs/${fileName}`;
                 return res.json({
                     report_url: url,
                     pdf_url: publicUrl
                 });
-
             } catch (pdfError) {
                 console.error("PDF Generation Failed", pdfError);
                 return res.status(500).send('Failed to generate PDF from report URL');
             }
         }
-
         // -------- Return report URL only --------
         res.json({ report_url: url });
 
