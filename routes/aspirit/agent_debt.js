@@ -72,7 +72,8 @@ router.post('/', async function (req, res) {
         url = procStepResult.Urls[0].url;
         // -------- Check if PDF generation is requested --------
         if (req.body.pdf === true || req.body.pdf === 'true') {
-            const tmpDir = path.join(__dirname, 'tmp');
+           // const tmpDir = path.join(__dirname, 'tmp');
+            const tmpDir = path.join(__dirname, '..', 'tmp');
             const fileName = `ar_ledger_${Date.now()}.pdf`;
             const filePath = path.join(tmpDir, fileName);
             if (!fs.existsSync(tmpDir)) {
