@@ -16,9 +16,10 @@ var printSalesOrderRouter = require('./routes/printSalesOrder');
 var printPriceQuoteRouter = require('./routes/printPriceQuote');
 var closeAinvoicesRouter = require('./routes/closeAinvoices');
 var closeEinvoicesRouter = require('./routes/closeEinvoices');
-const closeTinvoicesRouter = require('./routes/closeTinvoices');
+var closeTinvoicesRouter = require('./routes/closeTinvoices');
 var customer_formRouter = require('./routes/customer_form');
 var wsCargo = require('./routes/ws/cargo');
+var aspirit_agent_debtRouter = require('./routes/aspirit/agent_debt');
 //var sheferRouter = require('./routes/shefer/app');
 
 var app = express();
@@ -77,6 +78,7 @@ app.use('/closeTinvoices', closeTinvoicesRouter);
 app.use('/closeEinvoices', closeEinvoicesRouter);
 app.use('/customer_form', customer_formRouter);
 app.use('/ws/cargo',wsCargo);
+app.use('/aspirit/agent_debt',aspirit_agent_debtRouter);
 //app.use('/shefer/app',sheferRouter);
 
 // Static route for generated PDFs
