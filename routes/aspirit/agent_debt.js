@@ -7,6 +7,7 @@ const fs = require('fs');
 const priority = require('priority-web-sdk');
 const helper = require('../helper');
 const os = require('os');
+const html_to_pdf = require('html-pdf-node');
 
 // Body parsers
 const jsonParser = bodyParser.json();
