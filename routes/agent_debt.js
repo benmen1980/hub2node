@@ -130,7 +130,7 @@ router.post('/', async function (req, res) {
         // TODO: commented for now, once we verify the report works, we can remove this code
         // if (req.body.pdf === true || req.body.pdf === 'true') {
         //     const tmpDir = path.join(__dirname, 'tmp');
-        //     const fileName = `laxagent_debt_${Date.now()}.pdf`;
+        //     const fileName = `agent_debt_${Date.now()}.pdf`;
         //     const filePath = path.join(tmpDir, fileName);
         //     if (!fs.existsSync(tmpDir)) {
         //         fs.mkdirSync(tmpDir);

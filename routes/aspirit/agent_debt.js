@@ -71,8 +71,40 @@ router.post('/', async function (req, res) {
         // -------- Get report URL --------
         url = procStepResult.Urls[0].url;
         // -------- Check if PDF generation is requested --------
+        // if (req.body.pdf === true || req.body.pdf === 'true') {
+        //    // const tmpDir = path.join(__dirname, 'tmp');
+        //     const tmpDir = path.join(__dirname, '..', 'tmp');
+        //     const fileName = `ar_ledger_${Date.now()}.pdf`;
+        //     const filePath = path.join(tmpDir, fileName);
+        //     if (!fs.existsSync(tmpDir)) {
+        //         fs.mkdirSync(tmpDir);
+        //     }
+        //     try {
+        //         const isLinux = os.platform() === 'linux';
+        //         const browser = await puppeteer.launch({
+        //             headless: 'new',
+        //             executablePath: isLinux ? '/usr/bin/google-chrome-stable' : undefined,
+        //             args: ['--no-sandbox', '--disable-setuid-sandbox']
+        //         });
+        //         const page = await browser.newPage();
+        //         await page.goto(url, { waitUntil: 'networkidle0' });
+        //         await page.pdf({
+        //             path: filePath,
+        //             format: 'A4',
+        //             printBackground: true
+        //         });
+        //         await browser.close();
+        //         const publicUrl = `${req.protocol}://${req.get('host')}/pdfs/${fileName}`;
+        //         return res.json({
+        //             report_url: url,
+        //             pdf_url: publicUrl
+        //         });
+        //     } catch (pdfError) {
+        //         console.error("PDF Generation Failed", pdfError);
+        //         return res.status(500).send('Failed to generate PDF from report URL');
+        //     }
+        // }
         if (req.body.pdf === true || req.body.pdf === 'true') {
-           // const tmpDir = path.join(__dirname, 'tmp');
             const tmpDir = path.join(__dirname, '..', 'tmp');
             const fileName = `ar_ledger_${Date.now()}.pdf`;
             const filePath = path.join(tmpDir, fileName);
@@ -80,20 +112,15 @@ router.post('/', async function (req, res) {
                 fs.mkdirSync(tmpDir);
             }
             try {
-                const isLinux = os.platform() === 'linux';
-                const browser = await puppeteer.launch({
-                    headless: 'new',
-                    executablePath: isLinux ? '/usr/bin/google-chrome-stable' : undefined,
-                    args: ['--no-sandbox', '--disable-setuid-sandbox']
-                });
-                const page = await browser.newPage();
-                await page.goto(url, { waitUntil: 'networkidle0' });
-                await page.pdf({
-                    path: filePath,
+                const file = { url: url };
+                const options = {
                     format: 'A4',
                     printBackground: true
-                });
-                await browser.close();
+                };
+
+                const pdfBuffer = await html_to_pdf.generatePdf(file, options);
+                fs.writeFileSync(filePath, pdfBuffer);
+
                 const publicUrl = `${req.protocol}://${req.get('host')}/pdfs/${fileName}`;
                 return res.json({
                     report_url: url,
