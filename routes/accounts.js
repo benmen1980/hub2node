@@ -61,7 +61,7 @@ router.post('/', async function (req, res) {
             if (parsedFrom > parsedTo) {
                 return res.status(400).send('Invalid date range: from_date must be before or equal to to_date.');
             }
-
+            parsedFrom.setDate(1);
             fromDate = parsedFrom;
             toDate = parsedTo;
         } else {
