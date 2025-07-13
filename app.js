@@ -21,7 +21,6 @@ var customer_formRouter = require('./routes/customer_form');
 var wsCargo = require('./routes/ws/cargo');
 var aspirit_agent_debtRouter = require('./routes/aspirit/agent_debt');
 //var sheferRouter = require('./routes/shefer/app');
-let updateStatusRouter = require('./routes/updateStatus');
 
 var app = express();
 
@@ -80,7 +79,6 @@ app.use('/closeEinvoices', closeEinvoicesRouter);
 app.use('/customer_form', customer_formRouter);
 app.use('/ws/cargo',wsCargo);
 app.use('/aspirit/agent_debt',aspirit_agent_debtRouter);
-app.use('/updateOrderStatus',updateStatusRouter);
 //app.use('/shefer/app',sheferRouter);
 
 // Static route for generated PDFs
