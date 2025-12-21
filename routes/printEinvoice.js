@@ -14,6 +14,7 @@ router.post('/', function(req, res, next) {
       //  if(data.message) res.statusCode = 409;
         res.json(
         {'invoice_url' : data.url,
+            's3_url': data.s3_url,
             'message': data.message,
             'inputs' : data.inputs,
             'formats' : data.formats,
@@ -56,9 +57,17 @@ async function webSDK(req) {
         procWordTemplate = procedure.wordTemplates;
         console.log(procedure.Urls[0].url);
         let url = await procedure.Urls[0].url;
+        let s3Url = '';
+        try {
+            if(url){
+                s3Url = await s3Service.uploadPdfFromUrl(url, `EInvoice_${IVNUM}_${Date.now()}`);
+            }
+        } catch (e) {
+            console.log('s3 upload failed', e);
+        }
         procedure = await procedure.proc.continueProc();
         await procedure.proc.cancel()
-        return {'url' : url,'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
+        return {'url' : url, 's3_url': s3Url, 'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
     } catch (reason) {
         return reason;
     }

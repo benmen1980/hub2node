@@ -8,12 +8,14 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 // Priority and utils
 const priority = require('priority-web-sdk');
 const helper = require('./helper');
+const s3Service = require('../services/s3.service');
 
 router.post('/', function(req, res, next) {
     webSDK(req).then(data => {
         //  if(data.message) res.statusCode = 409;
         res.json(
             {'invoice_url' : data.url,
+                's3_url': data.s3_url,
                 'message': data.message,
                 'inputs' : data.inputs,
                 'formats' : data.formats,
@@ -67,10 +69,19 @@ async function webSDK(req) {
         procedure = await procedure.proc.documentOptions(1, -4,{pdf : 1,word :  false, mode: 'display'});
         procWordTemplate = procedure.wordTemplates;
         console.log(procedure.Urls[0].url);
+        // TODO: upload this pdf to s3 and return s3 url also
         let url = await procedure.Urls[0].url;
+        let s3Url = '';
+        try {
+            if(url){
+                s3Url = await s3Service.uploadPdfFromUrl(url, `CInvoice_${IVNUM}_${Date.now()}`);
+            }
+        } catch (e) {
+            console.log('s3 upload failed', e);
+        }
         procedure = await procedure.proc.continueProc();
         await procedure.proc.cancel()
-        return {'url' : url,'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
+        return {'url' : url, 's3_url': s3Url, 'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
     } catch (reason) {
         return reason;
     }

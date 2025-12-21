@@ -8,12 +8,14 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 // Priority and utils
 const priority = require('priority-web-sdk');
 const helper = require('./helper');
+const s3Service = require('../services/s3.service');
 /* POST to retrieve priority ACCOUNTS Procedure */
 router.post('/', function(req, res, next) {
     webSDK(req).then(data => {
         //  if(data.message) res.statusCode = 409;
         res.json(
             {'order_url' : data.url,
+                's3_url': data.s3_url,
                 'message': data.message,
                 'inputs' : data.inputs,
                 'formats' : data.formats,
@@ -49,7 +51,15 @@ async function webSDK(req) {
             return {'message' : procedure.message,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
         }
         let url = await procedure.Urls[0].url;
-        return {'url' : url,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
+        let s3Url = '';
+        try {
+            if(url){
+                s3Url = await s3Service.uploadPdfFromUrl(url, `PriceQuote_${req.body.CPROFNUM}_${Date.now()}`);
+            }
+        } catch (e) {
+            console.log('s3 upload failed', e);
+        }
+        return {'url' : url, 's3_url': s3Url,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
     } catch (reason) {
         return reason;
     }
