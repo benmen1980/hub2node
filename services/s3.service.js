@@ -18,24 +18,33 @@ const s3Client = new S3Client(clientParams);
 /**
  * Uploads a file from a URL to S3
  * @param {string} fileUrl - The URL of the file to download
- * @param {string} fileName - The desired filename in S3 (without extension, will be auto-detected or default to pdf)
+ * @param {string} fileName - The desired filename in S3
  * @param {string} folder - The folder in S3 bucket
+ * @param {string} cookies - Optional cookies to include in the request
  * @returns {Promise<string>} - The S3 URL of the uploaded file
  */
-async function uploadPdfFromUrl(fileUrl, fileName, folder = 'pdfs') {
+async function uploadPdfFromUrl(fileUrl, fileName, folder = 'pdfs', cookies = null) {
     try {
         if (!fileUrl) {
             // return empty string if fileUrl is not provided
             return '';
         }
-        const response = await axios({
+
+        const axiosConfig = {
             url: fileUrl,
             method: 'GET',
             responseType: 'arraybuffer'
-        });
+        };
+
+        if (cookies) {
+            axiosConfig.headers = {
+                'Cookie': cookies
+            };
+        }
+
+        const response = await axios(axiosConfig);
 
         const buffer = response.data;
-
         // only for pdf
         if (!fileName.endsWith('.pdf')) {
             fileName += '.pdf';

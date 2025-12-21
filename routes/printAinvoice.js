@@ -59,16 +59,18 @@ async function webSDK(req) {
         console.log(procedure.Urls[0].url);
         let url = await procedure.Urls[0].url;
         let s3Url = ''
-        try{
-            if(url){
-                s3Url = await s3Service.uploadPdfFromUrl(url, `AInvoice_${IVNUM}_${Date.now()}`);
+        try {
+            if (url) {
+                const cookies = priority.getCookies ? priority.getCookies() : null;
+                console.log('Using cookies for download:', cookies);
+                s3Url = await s3Service.uploadPdfFromUrl(url, `AInvoice_${IVNUM}_${Date.now()}`, 'pdfs', cookies);
             }
-        }catch(e){
+        } catch (e) {
             console.log('s3 upload failed', e);
         }
         procedure = await procedure.proc.continueProc();
         await procedure.proc.cancel()
-        return {'url' : url, 's3_url': s3Url, 'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
+        return { 'url': url, 's3_url': s3Url, 'inputs': procInput, 'formats': procFormats, 'wordTemplates': procWordTemplate };
     } catch (reason) {
         return reason;
     }
