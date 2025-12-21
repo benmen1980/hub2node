@@ -74,7 +74,9 @@ async function webSDK(req) {
         let s3Url = '';
         try {
             if(url){
-                s3Url = await s3Service.uploadPdfFromUrl(url, `CInvoice_${IVNUM}_${Date.now()}`);
+                const cookies = priority.getCookies ? priority.getCookies() : null;
+                console.log('Using cookies for download:', cookies);
+                s3Url = await s3Service.uploadPdfFromUrl(url, `CInvoice_${IVNUM}_${Date.now()}`, 'pdfs', cookies);
             }
         } catch (e) {
             console.log('s3 upload failed', e);
