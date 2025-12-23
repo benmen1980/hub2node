@@ -1,6 +1,6 @@
 {
   "name": "express-demo1",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
