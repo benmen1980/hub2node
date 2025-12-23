@@ -57,14 +57,13 @@ async function webSDK(req) {
         if (procedure.messagetype == 'error') {
             return { 'message': procedure.message, 'formats': procFormats, 'wordTemplates': procWordTemplate };
         }
-        let url = await procedure.Urls[0].url;
+        let url = procedure?.Urls?.[0]?.url ?? '';
+        if(!url) return {'message' : 'something went wrong...url is empty'};
         let s3Url = '';
         try {
-            if(url){
                 const cookies = priority.getCookies ? priority.getCookies() : null;
                 console.log('Using cookies for download:', cookies);
                 s3Url = await s3Service.uploadPdfFromUrl(url, `SalesOrder_${ORDNAME}_${Date.now()}`, 'pdfs', cookies);
-            }
         } catch (e) {
             console.log('s3 upload failed', e);
         }
