@@ -53,7 +53,7 @@ async function webSDK(req) {
         }
         procedure = await procedure.proc.clientContinue();
         procFormats =  procedure.formats;
-        procedure = await procedure.proc.documentOptions(1, -4,{pdf : 1,word :  false, mode: 'automail'});
+        procedure = await procedure.proc.documentOptions(1, -4,{pdf : 1,word :  false, mode: 'display'});
         procWordTemplate = procedure.wordTemplates;
         console.log(procedure.Urls[0].url);
         let url = await procedure.Urls[0].url;
