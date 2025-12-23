@@ -1,6 +1,6 @@
 {
   "name": "express-demo1",
-  "version": "1.4.9.7",
+  "version": "1.5",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
@@ -24,7 +24,6 @@
     "morgan": "~1.9.1",
     "node-modules": "^1.0.1",
     "nodemon": "^2.0.20",
-    "priority-web-sdk": "^3.0.15",
-    "puppeteer": "^24.8.2"
+    "priority-web-sdk": "^3.0.15"
   }
 }
