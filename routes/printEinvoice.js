@@ -8,6 +8,7 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 // Priority and utils
 const priority = require('priority-web-sdk');
 const helper = require('./helper');
+const s3Service = require('../services/s3.service');
 /* POST to retrieve priority ACCOUNTS Procedure */
 router.post('/', function(req, res, next) {
     webSDK(req).then(data => {
