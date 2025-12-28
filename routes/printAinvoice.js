@@ -54,7 +54,7 @@ async function webSDK(req) {
         }
         procedure = await procedure.proc.clientContinue();
         procFormats =  procedure.formats;
-        procedure = await procedure.proc.documentOptions(1, -4,{pdf : 1,word :  false, mode: 'display'});
+        procedure = await procedure.proc.documentOptions(1, req.body.FORMAT || -4,{pdf : 1,word :  false, mode: 'display'});
         procWordTemplate = procedure.wordTemplates;
         let url = procedure?.Urls?.[0]?.url ?? '';
         if(!url){
