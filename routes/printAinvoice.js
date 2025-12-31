@@ -9,6 +9,8 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 const priority = require('priority-web-sdk');
 const helper = require('./helper');
 const s3Service = require('../services/s3.service');
+const priorityPdfFetcher = require('../utils/priorityPdfFetcher');
+
 /* POST to retrieve priority ACCOUNTS Procedure */
 router.post('/', function(req, res, next) {
     webSDK(req).then(data => {
@@ -62,11 +64,15 @@ async function webSDK(req) {
         }
         let s3Url = ''
         try {
-                const cookies = priority.getCookies ? priority.getCookies() : null;
-                console.log('Using cookies for download:', cookies);
-                s3Url = await s3Service.uploadPdfFromUrl(url, `AInvoice_${IVNUM}_${Date.now()}`, 'pdfs', cookies);
+            console.log('Attempting to fetch PDF with new login flow...');
+            const pdfBuffer = await priorityPdfFetcher.fetchPriorityPdf(
+                url,
+                req.body.credentials.username,
+                req.body.credentials.password
+            );
+            s3Url = await s3Service.uploadPdfBuffer(pdfBuffer, `AInvoice_${IVNUM}_${Date.now()}`, 'pdfs');
         } catch (e) {
-            console.log('s3 upload failed', e);
+            console.log('PDF fetch/upload failed:', e.message);
         }
         procedure = await procedure.proc.continueProc();
         await procedure.proc.cancel()

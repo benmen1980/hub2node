@@ -76,4 +76,43 @@ async function uploadPdfFromUrl(fileUrl, fileName, folder = 'pdfs', cookies = nu
     }
 }
 
-module.exports = { uploadPdfFromUrl };
+module.exports = { uploadPdfFromUrl, uploadPdfBuffer };
+
+/**
+ * Uploads a PDF buffer to S3
+ * @param {Buffer} buffer - The PDF file buffer
+ * @param {string} fileName - The desired filename
+ * @param {string} folder - The folder in S3 bucket
+ * @returns {Promise<string>} - The S3 URL
+ */
+async function uploadPdfBuffer(buffer, fileName, folder = 'pdfs') {
+    try {
+        if (!fileName.endsWith('.pdf')) {
+            fileName += '.pdf';
+        }
+
+        const key = `${folder}/${fileName}`;
+        const bucketName = process.env.S3_BUCKET_NAME;
+
+        if (!bucketName) {
+            throw new Error('S3_BUCKET_NAME environment variable is not set');
+        }
+
+        const uploadParams = {
+            Bucket: bucketName,
+            Key: key,
+            Body: buffer,
+            ContentType: 'application/pdf',
+        };
+
+        const command = new PutObjectCommand(uploadParams);
+        await s3Client.send(command);
+        const s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION || 'us-west-2'}.amazonaws.com/${key}`;
+
+        console.log(`Buffer uploaded to S3: ${s3Url}`);
+        return s3Url;
+    } catch (error) {
+        console.error("Error uploading buffer to S3:", error);
+        throw error;
+    }
+}
