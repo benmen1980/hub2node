@@ -11,9 +11,9 @@ const helper = require('./helper');
 const s3Service = require('../services/s3.service');
 const priorityPdfFetcher = require('../utils/priorityPdfFetcher');
 /* POST to retrieve priority ACCOUNTS Procedure */
-router.post('/', function(req, res, next) {
+router.post('/', function (req, res, next) {
     webSDK(req).then(data => {
-      //  if(data.message) res.statusCode = 409;
+        //  if(data.message) res.statusCode = 409;
         res.json(
         {'invoice_url' : data.url,
             's3_url': data.s3_url,
@@ -62,12 +62,12 @@ async function webSDK(req) {
         let s3Url = '';
         try {
             console.log('Attempting to fetch PDF with new login flow...');
-            const pdfBuffer = await priorityPdfFetcher.fetchPriorityPdf(
-                url,
-                req.body.credentials.username,
-                req.body.credentials.password
-            );
-            s3Url = await s3Service.uploadPdfBuffer(pdfBuffer, `TInvoice_${IVNUM}_${Date.now()}`, 'pdfs');
+            // const pdfBuffer = await priorityPdfFetcher.fetchPriorityPdf(
+            //     url,
+            //     req.body.credentials.username,
+            //     req.body.credentials.password
+            // );
+            s3Url = await s3Service.uploadPdfFromUrl(url, `TInvoice_${IVNUM}_${Date.now()}`, 'pdfs');
         } catch (e) {
             console.log('PDF fetch/upload failed:', e.message);
         }
