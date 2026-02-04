@@ -52,13 +52,15 @@ async function webSDK(req) {
         if(procedure.messagetype == 'error'){
             return {'message' : procedure.message,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
         }
-        let url = procedure?.Urls?.[0]?.url ?? '';
-        if(!url) return {'message' : 'something went wrong...url is empty'};
+        const urlObj = procedure?.Urls?.[0];
+        const url = urlObj?.url ?? '';
+        const source = urlObj?.datauri || urlObj?.dataUri || urlObj?.filedata || url;
+        if (!source) return { 'message': 'something went wrong...pdf source is empty' };
         let s3Url = '';
         try {
             console.log('Attempting to fetch PDF with new login flow...');
             const pdfBuffer = await priorityPdfFetcher.fetchPriorityPdf(
-                url,
+                source,
                 req.body.credentials.username,
                 req.body.credentials.password
             );
@@ -72,7 +74,6 @@ async function webSDK(req) {
     }
 }
 module.exports = router;
-
 
 
 

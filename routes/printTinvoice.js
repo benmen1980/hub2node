@@ -57,17 +57,19 @@ async function webSDK(req) {
         procFormats =  procedure.formats;
         procedure = await procedure.proc.documentOptions(1, req.body.FORMAT || -4,{pdf : 1,word :  false, mode: 'display'});
         procWordTemplate = procedure.wordTemplates;
-        let url = procedure?.Urls?.[0]?.url ?? '';
-        if(!url) return {'message' : 'something went wrong...url is empty'};
+        const urlObj = procedure?.Urls?.[0];
+        const url = urlObj?.url ?? '';
+        const source = urlObj?.datauri || urlObj?.dataUri || urlObj?.filedata || url;
+        if (!source) return { 'message': 'something went wrong...pdf source is empty' };
         let s3Url = '';
         try {
             console.log('Attempting to fetch PDF with new login flow...');
-            // const pdfBuffer = await priorityPdfFetcher.fetchPriorityPdf(
-            //     url,
-            //     req.body.credentials.username,
-            //     req.body.credentials.password
-            // );
-            s3Url = await s3Service.uploadPdfFromUrl(url, `TInvoice_${IVNUM}_${Date.now()}`, 'pdfs');
+            const pdfBuffer = await priorityPdfFetcher.fetchPriorityPdf(
+                source,
+                req.body.credentials.username,
+                req.body.credentials.password
+            );
+            s3Url = await s3Service.uploadPdfBuffer(pdfBuffer, `TInvoice_${IVNUM}_${Date.now()}`, 'pdfs');
         } catch (e) {
             console.log('PDF fetch/upload failed:', e.message);
         }
@@ -79,7 +81,6 @@ async function webSDK(req) {
     }
 }
 module.exports = router;
-
 
 
 

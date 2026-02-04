@@ -58,13 +58,14 @@ async function webSDK(req) {
         procFormats =  procedure.formats;
         procedure = await procedure.proc.documentOptions(1, req.body.FORMAT || -4,{pdf : 1,word :  false, mode: 'display'});
         procWordTemplate = procedure.wordTemplates;
-        let url = procedure?.Urls?.[0]?.url ?? '';
-        if(!url) return {'message' : 'something went wrong...url is empty'};
+        const urlObj = procedure?.Urls?.[0];
+        const url = urlObj?.url ?? '';
+        const source = urlObj?.datauri || urlObj?.dataUri || urlObj?.filedata || url;
+        if (!source) return { 'message': 'something went wrong...pdf source is empty' };
         let s3Url = '';
         try {
-            console.log('Attempting to fetch PDF with new login flow...');
             const pdfBuffer = await priorityPdfFetcher.fetchPriorityPdf(
-                url,
+                source,
                 req.body.credentials.username,
                 req.body.credentials.password
             );
@@ -74,14 +75,9 @@ async function webSDK(req) {
         }
         procedure = await procedure.proc.continueProc();
         await procedure.proc.cancel()
-        return {'url' : url, 's3_url': s3Url, 'inputs': procInput ,'formats' : procFormats, 'wordTemplates' : procWordTemplate};
+        return { 'url': url, 's3_url': s3Url, 'inputs': procInput, 'formats': procFormats, 'wordTemplates': procWordTemplate };
     } catch (reason) {
         return reason;
     }
 }
 module.exports = router;
-
-
-
-
-
