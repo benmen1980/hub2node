@@ -23,4 +23,9 @@ yum install -y \
   xorg-x11-fonts-75dpi \
   xorg-x11-fonts-Type1 \
   xorg-x11-fonts-misc \
-  xorg-x11-utils
+  xorg-x11-utils \
+  google-noto-sans-fonts \
+  google-noto-serif-fonts \
+  google-noto-sans-hebrew-fonts \
+  dejavu-sans-fonts \
+  fontconfig
