@@ -2,9 +2,9 @@
 
 yum install -y \
   atk \
+  at-spi2-atk \
   cups-libs \
   gtk3 \
-  ipa-gothic-fonts \
   libXcomposite \
   libXcursor \
   libXdamage \
@@ -14,9 +14,13 @@ yum install -y \
   libXScrnSaver \
   libXtst \
   pango \
+  alsa-lib \
+  libdrm \
+  mesa-libgbm \
+  libxshmfence \
+  libxkbcommon \
   xorg-x11-fonts-100dpi \
   xorg-x11-fonts-75dpi \
-  xorg-x11-fonts-cyrillic \
-  xorg-x11-fonts-misc \
   xorg-x11-fonts-Type1 \
+  xorg-x11-fonts-misc \
   xorg-x11-utils
