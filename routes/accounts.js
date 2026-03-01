@@ -171,7 +171,8 @@ router.post('/', async function (req, res) {
                 const file = { url: url };
                 const options = {
                     format: 'A4',
-                    printBackground: true
+                    printBackground: true,
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
                 };
 
                 const pdfBuffer = await html_to_pdf.generatePdf(file, options);
