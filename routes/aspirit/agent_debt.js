@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
-// const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
 const priority = require('priority-web-sdk');
 const helper = require('../helper');
-const os = require('os');
-const html_to_pdf = require('html-pdf-node');
+const { renderAuthenticatedPriorityPdf } = require('../../utils/authenticatedPriorityPdf');
 
 // Body parsers
 const jsonParser = bodyParser.json();
@@ -15,9 +13,10 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 // POST route
 router.post('/', async function (req, res) {
+    let loginResult;
     try {
         // Login to Priority
-        await priority.login(req.body.credentials);
+        loginResult = await priority.login(req.body.credentials);
     } catch (error) {
         res.status(400).send(
             'Priority module failed to start\n' + error.message +
@@ -113,13 +112,11 @@ router.post('/', async function (req, res) {
                 fs.mkdirSync(tmpDir);
             }
             try {
-                const file = { url: url };
-                const options = {
-                    format: 'A4',
-                    printBackground: true
-                };
-
-                const pdfBuffer = await html_to_pdf.generatePdf(file, options);
+                const pdfBuffer = await renderAuthenticatedPriorityPdf(
+                    url,
+                    loginResult,
+                    req.body.credentials
+                );
                 fs.writeFileSync(filePath, pdfBuffer);
 
                 const publicUrl = `${req.protocol}://${req.get('host')}/pdfs/${fileName}`;

@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
-const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
 const priority = require('priority-web-sdk');
 const helper = require('./helper');
+const { renderAuthenticatedPriorityPdf } = require('../utils/authenticatedPriorityPdf');
 
 // Body parsers
 const jsonParser = bodyParser.json();
@@ -167,61 +167,12 @@ router.post('/', async function (req, res) {
             }
 
             try {
-                const options = {
-                    format: 'A4',
-                    printBackground: true,
-                    args: ['--no-sandbox', '--disable-setuid-sandbox']
-                };
-
-                // The SDK session is held by its XHR client. The PDF renderer is a
-                // separate browser, so explicitly transfer the HTML-service cookies.
-                const constants = await loginResult.constants();
-                const reportHost = new URL(url).hostname;
-                const cookies = [];
-
-                if (constants.htmlsvccookie) {
-                    cookies.push({
-                        name: 'PriUserV2',
-                        value: constants.htmlsvccookie,
-                        domain: reportHost,
-                        path: '/'
-                    });
-                }
-                if (constants.mgcookie) {
-                    cookies.push({
-                        name: 'PriUser',
-                        value: constants.mgcookie,
-                        domain: reportHost,
-                        path: '/'
-                    });
-                }
-                cookies.push({
-                    name: 'Environment',
-                    value: req.body.credentials.profile.company,
-                    domain: reportHost,
-                    path: '/'
-                });
-
-                const browser = await puppeteer.launch({ args: options.args });
-                try {
-                    const page = await browser.newPage();
-                    await page.setCookie(...cookies);
-                    await page.goto(url, { waitUntil: ['load', 'networkidle0'] });
-
-                    const pageUrl = page.url();
-                    const pageHtml = await page.content();
-                    if (/\/auth\/|oauth2|_netsession["'= ]+emptyhtml/i.test(pageUrl + pageHtml)) {
-                        throw new Error('Priority report opened the login page; authenticated session was not accepted');
-                    }
-
-                    const pdfBuffer = await page.pdf({
-                        format: options.format,
-                        printBackground: options.printBackground
-                    });
-                    fs.writeFileSync(filePath, pdfBuffer);
-                } finally {
-                    await browser.close();
-                }
+                const pdfBuffer = await renderAuthenticatedPriorityPdf(
+                    url,
+                    loginResult,
+                    req.body.credentials
+                );
+                fs.writeFileSync(filePath, pdfBuffer);
 
                 const publicUrl = `${req.protocol}://${req.get('host')}/pdfs/${fileName}`;
                 return res.json({
