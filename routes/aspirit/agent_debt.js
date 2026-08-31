@@ -6,6 +6,7 @@ const fs = require('fs');
 const priority = require('priority-web-sdk');
 const helper = require('../helper');
 const { renderAuthenticatedPriorityPdf } = require('../../utils/authenticatedPriorityPdf');
+const { getPublicUrl } = require('../../utils/publicUrl');
 
 // Body parsers
 const jsonParser = bodyParser.json();
@@ -119,7 +120,7 @@ router.post('/', async function (req, res) {
                 );
                 fs.writeFileSync(filePath, pdfBuffer);
 
-                const publicUrl = `${req.protocol}://${req.get('host')}/pdfs/${fileName}`;
+                const publicUrl = getPublicUrl(req, `/pdfs/${fileName}`);
                 return res.json({
                     report_url: url,
                     pdf_url: publicUrl
