@@ -1,0 +1,64 @@
+name: Deploy to Elastic Beanstalk
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: eu-west-1
+  EB_APPLICATION: automation-platform
+  EB_ENVIRONMENT: automation-testing
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
+      - name: Package application
+        run: |
+          zip -r application.zip . \
+            -x '.git/*' 'node_modules/*' 'routes/tmp/*.pdf' '*.zip'
+
+      - name: Upload source bundle
+        id: upload
+        run: |
+          bucket=$(aws elasticbeanstalk create-storage-location --query S3Bucket --output text)
+          key="hub2node/${GITHUB_SHA}.zip"
+          aws s3 cp application.zip "s3://${bucket}/${key}"
+          echo "bucket=${bucket}" >> "$GITHUB_OUTPUT"
+          echo "key=${key}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Elastic Beanstalk application version
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name "$EB_APPLICATION" \
+            --version-label "github-${GITHUB_SHA}" \
+            --source-bundle S3Bucket="${{ steps.upload.outputs.bucket }}",S3Key="${{ steps.upload.outputs.key }}" \
+            --process
+
+      - name: Deploy application version
+        run: |
+          aws elasticbeanstalk update-environment \
+            --application-name "$EB_APPLICATION" \
+            --environment-name "$EB_ENVIRONMENT" \
+            --version-label "github-${GITHUB_SHA}"
+
+      - name: Wait for deployment
+        run: |
+          aws elasticbeanstalk wait environment-updated \
+            --application-name "$EB_APPLICATION" \
+            --environment-names "$EB_ENVIRONMENT"
